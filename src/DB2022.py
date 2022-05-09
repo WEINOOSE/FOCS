@@ -97,12 +97,12 @@ class Tyre():
 
 s = Tyre('Slick',-0.350,3.500)
 h = Tyre('Hard',1.350,1.500) 
-i = Tyre('Intermediate',14.500,0.750) 
-w = Tyre('Wet',20.350,0.650)
+i = Tyre('Intermediate',5.500,0.750) 
+w = Tyre('Wet',8.500,0.650)
 
 compounds = [s,h,i,w]
 collision = 7
-stamina = 3.75
+stamina = 4
 safety = 40
 # Constants
 weather = 0
