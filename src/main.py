@@ -29,8 +29,7 @@ def SESSION(tracknamespace):
 
     weather = 0
     rain_odd = randint(0,100)
-
-    for i in car.values[:,2:6]:
+    for i in car.values[:,2:6].tolist():
         car0 = []
         i_0 = (formula[0]-i[0])
         i_1 = (formula[1]-i[1])
@@ -52,9 +51,9 @@ def SESSION(tracknamespace):
         match_table_in_order.append(car0)
 
     for i,j in zip(match_table_in_order,car.values[:,7:8]):
-        folk = (sum(i)**4) + (j[0]**3)
-        res = folk*(track.time/100000)
-        gain_times_in_order.append(float(res))
+        folk = ((sum(i)**4)*0.5) + ((j[0]**3)*2.4)
+        res = (folk*(track.time/100000))/2
+        gain_times_in_order.append(float((res-1)*0.5))
 
     car['LOSS'] = gain_times_in_order
 
@@ -406,11 +405,11 @@ def SESSION(tracknamespace):
                     total_pit, crew = 0, 0
                     pit_dict[name] += 0
                 
-                nonindividual = (track.time + (loss_of_the_car)*1.5 + total_pit + (round(driver[28])*10) - (driver[28]*10) + ((track.time*3)/90) -((track.time*3.5)/86))*1.01
+                nonindividual = (track.time + (loss_of_the_car)*5 + total_pit + (round(driver[28])*10) - (driver[28]*10) + ((track.time*3)/90) -((track.time*3.5)/86))
                 individual = (-(uniform(0.01,0.10)*form -(track.time/60))*0.05 + uniform(-(racecraft**3/2500000), ((100-racecraft)**3/75000)) + uniform(0, (fail_odd/5)) + uniform(-(form**2/20), ((3-form)**2/20)))*0.1
                 tttire = tyre_selection.laptime(fuel_left,track.lap,lap_number,lastik_dict[name])
-                klas = klas_of_drivers_today[name]
-                todays_form = form_of_drivers_today[name]
+                klas = (klas_of_drivers_today[name])*0.2
+                todays_form = (form_of_drivers_today[name])*0.2
                 # TOTALIZE AND TO PREVENT DNF'ED PLAYER TO PERFORM AN FASTEST LAP
                 if name in (dnf0 or dnf2):
                     laptime = 99999
@@ -613,5 +612,5 @@ def SESSION(tracknamespace):
 # # #
 
 shutil.rmtree('__pycache__')
-SESSION('Bahrain')
+SESSION('Melbourne')
 remove('temp.csv')
