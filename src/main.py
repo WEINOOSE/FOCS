@@ -408,7 +408,7 @@ def SESSION(tracknamespace):
                     total_pit, crew = 0, 0
                     pit_dict[name] += 0
                 
-                nonindividual = (track.time + (loss_of_the_car)*1.5 + total_pit + (round(driver[28])*10) - (driver[28]*10) + ((track.time*3)/90) -((track.time*3.5)/86))*1.02
+                nonindividual = (track.time + (loss_of_the_car)*1.5 + total_pit + (round(driver[28])*10) - (driver[28]*10) + ((track.time*3)/90) -((track.time*3.5)/86))*1.05
                 individual = (-(uniform(0.01,0.10)*form -(track.time/60))*0.05 + uniform(-(racecraft**3/2500000), ((100-racecraft)**3/75000)) + uniform(0, (fail_odd/5)) + uniform(-(form**2/20), ((3-form)**2/20)))*0.1
                 if tyre_selection.title == 'Intermediate':
                     tttire = tyre_selection.laptime(fuel_left,track.lap,lap_number,lastik_dict[name]) - (((racecraft)/100)*1.5)
