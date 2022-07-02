@@ -277,6 +277,8 @@ def SESSION(tracknamespace):
     # LET'S SEE THE REST OF THE RACE
 
     def RACE():
+        overtook_test = 0
+        defence_test = 0
         weather, race_conditions, dnf0 = f1.weather, [], []
         if weather == 1: 
             if randint(0,100) > 75:
@@ -348,7 +350,7 @@ def SESSION(tracknamespace):
                 loss_of_the_car = driver[26] + ((uniform(0,((100-driver[7])/2)))/100)
                 live_interval = driver[31]
                 car_stamina = driver[27]
-                DNF_PROB = uniform(0,750*f1.stamina)
+                DNF_PROB = uniform(0,750*4)
 
                 lastik_dict[name] = driver[16] - ((tyre_selection.tyre(driver[16],track.lap,tires,track.deg))*1.2) + (uniform(tyre_usage_skill*1.5,tyre_usage_skill*2.5))
                 
@@ -408,7 +410,7 @@ def SESSION(tracknamespace):
                     total_pit, crew = 0, 0
                     pit_dict[name] += 0
                 
-                nonindividual = (track.time + (loss_of_the_car)*1.5 + total_pit + (round(driver[28])*10) - (driver[28]*10) + ((track.time*3)/90) -((track.time*3.5)/86))*1.05
+                nonindividual = (track.time + (loss_of_the_car)*7 + total_pit + (round(driver[28])*10) - (driver[28]*10) + ((track.time*3)/90) -((track.time*3.5)/86))*1.05 -5
                 individual = (-(uniform(0.01,0.10)*form -(track.time/60))*0.05 + uniform(-(racecraft**3/2500000), ((100-racecraft)**3/75000)) + uniform(0, (fail_odd/5)) + uniform(-(form**2/20), ((3-form)**2/20)))*0.1
                 if tyre_selection.title == 'Intermediate':
                     tttire = tyre_selection.laptime(fuel_left,track.lap,lap_number,lastik_dict[name]) - (((racecraft)/100)*1.5)
@@ -526,45 +528,43 @@ def SESSION(tracknamespace):
 
             igo = 0
             data = data.sort_values('INTERVAL',ascending=True)
-            while igo<len(mx):
-                try:
-                    defender_name = mx[igo+1]
-                    attacker_name = mx[igo]
-                    if weather == 0:
-                        attacker_drs = f1.DRS
-                    else:
-                        attacker_drs = 0
-                    a = pd.DataFrame(data.loc[data['DRIVER'] == attacker_name]['ERS']).iloc[0][0]
-                    d = pd.DataFrame(data.loc[data['DRIVER'] == defender_name]['ERS']).iloc[0][0]
-                    attacker_ers = (uniform(a,a+1))*25
-                    defender_ers = (uniform(d,d+1))*45
-                    defender_defence = pd.DataFrame(data.loc[data['DRIVER'] == defender_name]['DEFENCE']).iloc[0][0] + defender_ers
-                    attacker_attack = pd.DataFrame(data.loc[data['DRIVER'] == attacker_name]['ATTACK']).iloc[0][0]+ attacker_ers + attacker_drs
-                    defender_agression = (pd.DataFrame(data.loc[data['DRIVER'] == defender_name]['AGRESSION']).iloc[0][0]) + randint(0,1*f1.safety)
-                    attacker_agression = (pd.DataFrame(data.loc[data['DRIVER'] == attacker_name]['AGRESSION']).iloc[0][0]) + a + randint(0,10)
-                    losing_time = abs(((attacker_agression - defender_agression)/10)*2)
-
-                    if defender_defence + randint(-50,450) > attacker_attack:
-                        s_dict[attacker_name] += losing_time/1.75
-                        s_dict[defender_name] += losing_time/1.75
-                    else:
-                        if (attacker_agression > defender_agression*(f1.stamina+2.5)) and (attacker_name and defender_name not in dnf0):
-                            if (attacker_agression > defender_agression*f1.stamina*f1.stamina):
-                                print(f'LAP {lap_number} - {defender_name} and {attacker_name} got together, both has crashed. Safety car has deployed.')
-                                dnf0.append(defender_name)
-                                dnf0.append(attacker_name)
-                                crash_alert = 1
-                            else:
-                                print(f'LAP {lap_number} - {defender_name} and {attacker_name} got together, {defender_name} has crashed. Safety car has deployed.')
-                                dnf0.append(defender_name)
-                                s_dict[attacker_name] += losing_time*2.5
-                                crash_alert = 1
+            while igo+1 < len(mx):
+                defender_name = mx[igo+1]
+                attacker_name = mx[igo]
+                if weather == 0:
+                    attacker_drs = f1.DRS
+                else:
+                    attacker_drs = 0
+                a = pd.DataFrame(data.loc[data['DRIVER'] == attacker_name]['ERS']).iloc[0][0]
+                d = pd.DataFrame(data.loc[data['DRIVER'] == defender_name]['ERS']).iloc[0][0]
+                attacker_ers = (uniform(a,a+1))*25
+                defender_ers = (uniform(d,d+1))*45
+                defender_defence = pd.DataFrame(data.loc[data['DRIVER'] == defender_name]['DEFENCE']).iloc[0][0] + defender_ers
+                attacker_attack = pd.DataFrame(data.loc[data['DRIVER'] == attacker_name]['ATTACK']).iloc[0][0]+ attacker_ers + attacker_drs
+                defender_agression = (pd.DataFrame(data.loc[data['DRIVER'] == defender_name]['AGGRESSION']).iloc[0][0]) + randint(0,40)
+                attacker_agression = (pd.DataFrame(data.loc[data['DRIVER'] == attacker_name]['AGGRESSION']).iloc[0][0]) + a + randint(0,10)
+                losing_time = abs(((attacker_agression - defender_agression)/10)*2)
+                if defender_defence + randint(f1.DRS-200,f1.DRS+100) > attacker_attack*track.overtake_chance:
+                    defence_test += 1
+                    s_dict[attacker_name] += losing_time+5
+                    s_dict[defender_name] += losing_time+1
+                else:
+                    if (attacker_agression > defender_agression+(randint(f1.lower_stamina,f1.upper_stamina))) and (attacker_name and defender_name not in dnf0):
+                        if randint(0,100)>50:
+                            print(f'LAP {lap_number} - {defender_name} and {attacker_name} got together, both has crashed. Safety car has deployed.')
+                            dnf0.append(defender_name)
+                            dnf0.append(attacker_name)
+                            crash_alert = 1
                         else:
-                            s_dict[attacker_name] += losing_time/3.75
-                            s_dict[defender_name] += losing_time/1.25
-                    igo += 2
-                except:
-                    igo += 2
+                            print(f'LAP {lap_number} - {defender_name} and {attacker_name} got together, {defender_name} has crashed. Safety car has deployed.')
+                            dnf0.append(defender_name)
+                            s_dict[attacker_name] += losing_time+10
+                            crash_alert = 1
+                    else:
+                        overtook_test += 1
+                        s_dict[attacker_name] += losing_time+1
+                        s_dict[defender_name] += losing_time+5
+                igo += 2
 
             # # # # #
 
@@ -614,7 +614,7 @@ def SESSION(tracknamespace):
         pit_df['INTERVAL'] = new_interval_dnfs_included
         data['PIT'] = list(pit_df['PIT'])
         print(f'\n{race_conditions[0]}\n\n{data[["LEAD","TITLE","DRIVER","INTERVAL","GRID","PIT"]].groupby("LEAD").max()}')
-        print(f'\nLAP {the_lap[the_laptime.index(min(the_laptime))]} | {the_name[the_laptime.index(min(the_laptime))]} | {thefl}\n')
+        print(f'\nLAP {the_lap[the_laptime.index(min(the_laptime))]} | {the_name[the_laptime.index(min(the_laptime))]} | {thefl}\nOvertakes: {overtook_test}')
     RACE()
 
 # # #
