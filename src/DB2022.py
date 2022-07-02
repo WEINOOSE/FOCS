@@ -1,5 +1,4 @@
 DRS = 500
-from random import randint
 
 import pandas as pd
 last_df_df = pd.DataFrame()
