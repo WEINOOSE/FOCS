@@ -1,5 +1,5 @@
 import pandas as pd
-import DB2009 as f1
+import DB2022 as f1
 from random import randint, uniform, choice
 import numpy as np
 import shutil
@@ -21,8 +21,9 @@ def SESSION(tracknamespace):
 
     # # #
 
-    car = car.drop(axis=1, columns=['OVERALL'])
-    car['LOSS'] = [0,0,0,0,0,0,0,0,0]
+    car = car.drop(axis=1, columns=['CLASS'])
+    car['LOSS'] = [0,0,0,0,0,0,0,0,0,0]
+    car = car.sort_values('OVERALL',ascending=False)
 
     # # #
 
@@ -100,10 +101,10 @@ def SESSION(tracknamespace):
                     print(f'{f[1]} has crashed the car during the qualifying session, he is out.')
             else:
                 if tyre == slick:
-                    laps.append((pace2*0.2)+(perfect_time*1)+(tyre*1)+(z*2)+(chance*0.9)+(poly*0.9)-(2.5)+(track.time/45)+f1.plus_time)
+                    laps.append((pace2*0.2)+(perfect_time*1)+(tyre*1)+(z*2)+(chance*0.9)+(poly*0.9)-(2.5)+(track.time/45))
                 else:
                     forreal = ((100-wet)/10)
-                    laps.append((pace2*0.2)+(perfect_time*1)+(tyre*1)+(z*2)+(chance*0.9)+(poly*0.9)-(5.0)+forreal+(track.time/45)+f1.plus_time*1.05)
+                    laps.append((pace2*0.2)+(perfect_time*1)+(tyre*1)+(z*2)+(chance*0.9)+(poly*0.9)-(5.0)+forreal+(track.time/45))
                 quali_laps += 1
         
         if (car_status == 0) and (len(laps) == 0):
@@ -352,7 +353,7 @@ def SESSION(tracknamespace):
                 fail_odd = driver[10]
                 tyre_usage_skill = driver[13]
                 fuel_left = tyre_selection.fuel(110,track.lap,lap_number)
-                loss_of_the_car = float(driver[26]) + float(((uniform(0,((100-driver[7])/2)))/100))
+                loss_of_the_car = driver[26] + ((uniform(0,((100-driver[7])/2)))/100)
                 live_interval = driver[31]
                 car_stamina = driver[27]
                 DNF_PROB = uniform(0,750*4)
@@ -415,7 +416,7 @@ def SESSION(tracknamespace):
                     total_pit, crew = 0, 0
                     pit_dict[name] += 0
                 
-                nonindividual = f1.plus_time + (track.time + (loss_of_the_car)*7 + total_pit + (round(driver[28])*10) - (driver[28]*10) + ((track.time*3)/90) -((track.time*3.5)/86))*1.05 -5
+                nonindividual = (track.time + (loss_of_the_car)*7 + total_pit + (round(driver[28])*10) - (driver[28]*10) + ((track.time*3)/90) -((track.time*3.5)/86))*1.05 -5
                 individual = (-(uniform(0.01,0.10)*form -(track.time/60))*0.05 + uniform(-(racecraft**3/2500000), ((100-racecraft)**3/75000)) + uniform(0, (fail_odd/5)) + uniform(-(form**2/20), ((3-form)**2/20)))*0.1
                 if tyre_selection.title == 'Intermediate':
                     tttire = tyre_selection.laptime(fuel_left,track.lap,lap_number,lastik_dict[name]) - (((racecraft)/100)*1.5)
@@ -549,7 +550,7 @@ def SESSION(tracknamespace):
                 defender_agression = (pd.DataFrame(data.loc[data['DRIVER'] == defender_name]['AGGRESSION']).iloc[0][0]) + randint(0,40)
                 attacker_agression = (pd.DataFrame(data.loc[data['DRIVER'] == attacker_name]['AGGRESSION']).iloc[0][0]) + a + randint(0,10)
                 losing_time = abs(((attacker_agression - defender_agression)/10)*2)
-                if defender_defence + randint(25,75) > attacker_attack*track.overtake_chance:
+                if defender_defence + randint(f1.DRS-200,f1.DRS+100) > attacker_attack*track.overtake_chance:
                     defence_test += 1
                     s_dict[attacker_name] += losing_time+5
                     s_dict[defender_name] += losing_time+1
